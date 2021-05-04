@@ -123,21 +123,20 @@ end
 
 -- push a crate
 function move_crate(x,y)
-	
-	tile = mget(x,y)
-
-	mset(x,y,1)
-	
-	if push == "left" then
-		x +=1
-	elseif push == "right" then
-	 x -=1
-	elseif push == "up" then
-		y -=1
-	elseif push == "down" then
-		y +=1
-	end
-	mset(x,y,21)
+		nx = x
+		ny = y
+		if push == "left" then
+			nx +=1
+		elseif push == "right" then
+		 nx -=1
+		elseif push == "up" then
+			ny -=1
+		elseif push == "down" then
+			ny +=1
+		end
+	if can_move(nx,ny) then
+		mset(x,y,1)
+		mset(nx,ny,21)
 	end
 end
 	
