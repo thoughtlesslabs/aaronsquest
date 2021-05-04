@@ -123,7 +123,6 @@ function swap_tile(x,y)
 	mset(x,y,tile+1)
 end
 
-
 -- push a crate
 function move_crate(x,y)
 	nx = x
