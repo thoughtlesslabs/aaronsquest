@@ -7,15 +7,16 @@ __lua__
 function _init()
  _update60= update_menu
 	_draw= draw_menu
+	crates = {}
 	init_player()
 	init_map()
+	init_crates()
 end
 
 function init_map()
  wall = {49,33,34,21,5}
  door = {5}
  opendoor ={6}
- crate = {21}
 end
 
 function init_player()
@@ -23,6 +24,14 @@ function init_player()
 	p.x = 1
 	p.y = 1
 	p.sprite = 8
+end
+
+function init_crates()
+	crate = {}
+	crate.x = 20
+	crate.y = 10
+	crate.sprite = 21
+	add(crates,crate)
 end
 
 
@@ -71,7 +80,8 @@ function draw_game()
 	cls()
 	draw_map()
 	draw_player()
-	print(x,80,0,7)
+	draw_crate()
+	print(#crates,80,0,7)
 end
 
 function draw_map()
@@ -86,6 +96,10 @@ end
 
 function draw_player()
 	spr(p.sprite,p.x*8,p.y*8)
+end
+
+function draw_crate()
+ spr(crate.sprite,crate.x*8,crate.y*8)
 end
 -->8
 -- game functions
@@ -106,13 +120,25 @@ function is_tile(tile_type,x,y)
 	return false
 end
 
+-- check if crate
+function is_crate(x,y)
+	cloc = sget(x,y)
+	for i=1,#crates do
+		if cloc == crates[i] then
+			return true
+		end
+	end
+	return false
+end
+
 -- interaction options based
 -- on the tile
 function interact(x,y)
-	if is_tile(crate,x,y) then
-		move_crate(x,y)
-	elseif is_tile(door,x,y) then
+	if is_tile(door,x,y) then
 	 swap_tile(x,y)
+	end
+	if is_crate(x,y) then
+		move_crate(x,y)
 	end
 end
 		
@@ -137,10 +163,8 @@ function move_crate(x,y)
 	elseif push == "down" then
 		ny +=1
 	end
-	if can_move(nx,ny) then
-		mset(x,y,tile)
-		mset(nx,ny,21)
-	end
+	sget(nx,ny)
+
 end
 
 
