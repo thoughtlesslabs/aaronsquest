@@ -11,6 +11,13 @@ function _init()
 	init_player()
 	init_map()
 	init_crates()
+	
+	-- hit box test--
+	x1r=0
+	y1r=0
+	x2r=0
+	y2r=0
+	-----------------
 end
 
 function init_map()
@@ -28,7 +35,7 @@ end
 
 function init_crates()
 	crate = {}
-	crate.x = 20
+	crate.x = 4
 	crate.y = 10
 	crate.sprite = 21
 	add(crates,crate)
@@ -67,6 +74,13 @@ function move_player()
 	else
 		sfx(0)
 	end
+	
+	--- hitbox test
+	x1r=p.x
+	x2r=p.x+1
+	y1r=p.y
+	y2r=p.y+1
+	----------------
 end
 -->8
 -- draw functions
@@ -100,13 +114,20 @@ end
 
 function draw_crate()
  spr(crate.sprite,crate.x*8,crate.y*8)
+	-- draw rect for hit box
+	rect(x1r*8,y1r*8,x2r*8,y2r*8)
+	------------------------
 end
 -->8
 -- game functions
 
 --  check if the player can move
 function can_move(x,y)
-	return not is_tile(wall,x,y)
+	if is_tile(wall,x,y) or is_crate(x,y) then
+		return false
+	else
+		return true
+	end
 end
 
 -- check for tile type
@@ -120,13 +141,10 @@ function is_tile(tile_type,x,y)
 	return false
 end
 
--- check if crate
+-- check if hit crate
 function is_crate(x,y)
-	cloc = sget(x,y)
-	for i=1,#crates do
-		if cloc == crates[i] then
-			return true
-		end
+	if x == crate.x and y==crate.y then
+		return true
 	end
 	return false
 end
@@ -163,7 +181,12 @@ function move_crate(x,y)
 	elseif push == "down" then
 		ny +=1
 	end
-	sget(nx,ny)
+	
+	if can_move(nx,ny) then
+		crate.x = mid(0,nx,127)
+		crate.y = mid(0,ny,63)
+	end
+	
 
 end
 
