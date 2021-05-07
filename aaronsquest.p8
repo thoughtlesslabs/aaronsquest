@@ -8,14 +8,16 @@ function _init()
  _update60= update_menu
 	_draw= draw_menu
 	movable_items = {}
+	keycode = {}
 	init_player()
 	init_map()
+	add_keycode()
 	add_movables()
 	reading=false
 end
 
 function init_map()
- wall = {49,5,1,2,50}
+ wall = {49,5,1,2,50,21}
  door = {5}
  opendoor ={6}
  key = {32,16}
@@ -27,7 +29,21 @@ function init_player()
 	p.y = 1
 	p.sprite = 8
 	p.keys = 0
-	p.collected = ""
+end
+
+function init_code(x,y,k)
+ code = {}
+ code.x = x
+ code.y = y
+ code.key = k
+ code.show = false
+ add(keycode,code)
+end
+
+function add_keycode()
+	init_code(5,2,"a")
+	init_code(12,2,"b")
+	init_code(13,7,"c")
 end
 
 function init_movable(x,y,sprite)
@@ -47,6 +63,8 @@ function add_movables()
 	init_movable(4,2,19)
 	init_movable(12,2,35)
 end	
+
+
 	
 
 
@@ -68,7 +86,16 @@ function update_game()
  else
   move_player()
   if btnp(4) then
-  	tb_init(0,{"inventory\nkeys: "..p.keys.."\ncode: "..p.collected})
+  local chrs={"","",""}
+  for i=1,#keycode do
+  	if keycode[i].show then
+  	 chrs[i] = keycode[i].key
+  	else
+  		chrs[i] = " "
+  	end
+  end
+  showcode = chrs[1]..chrs[2]..chrs[3]		
+	 	tb_init(0,{"inventory\nkeys: "..p.keys.."\ncode: "..showcode})
  	end
  end
 end
@@ -107,6 +134,7 @@ function draw_game()
 	draw_player()
 	draw_movables()
 	tb_draw()
+	print(keycode[1].show)
 end
 
 function draw_map()
@@ -128,6 +156,7 @@ function draw_movables()
  	spr(movable_items[i].sprite,movable_items[i].x*8,movable_items[i].y*8)
 	end
 end
+
 -->8
 -- game functions
 
@@ -158,8 +187,19 @@ function is_movable(x,y)
 			return true
 		end
 	end
-		return false
+	return false
 end
+
+-- check if a keycode
+function is_keycode(x,y)
+	for i=1,#keycode do
+		if x == keycode[i].x and y == keycode[i].y then
+			return true
+		end
+	end
+	return false
+end
+
 
 -- interaction options based
 -- on the tile
@@ -176,6 +216,8 @@ function interact(x,y)
 		p.keys+=1
 		swap_tile(x,y)
 		tb_init(0,{"you found a key!"})
+	elseif is_keycode(x,y) then
+		update_code(x,y)
 	end
 end
 		
@@ -211,8 +253,14 @@ function move_item(x,y)
 	end
 end
 
-
-	
+-- update found code letters
+function update_code(x,y)
+	for i=1,#keycode do
+		if x == keycode[i].x and y == keycode[i].y then
+			keycode[i].show = true
+		end
+	end
+end
 -->8
 -- text boxes
 
