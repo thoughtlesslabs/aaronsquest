@@ -56,9 +56,11 @@ function init_starts(x,y)
 end
 
 function add_starts()
-	init_starts(32,12)
+	init_starts(29,12)
 	init_starts(49,22)
 	init_starts(3,1)
+	init_starts(48,14)
+	init_starts(24,33)
 end
 
 function init_player(px,py,sp,sk)
