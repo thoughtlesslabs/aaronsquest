@@ -7,14 +7,18 @@ __lua__
 function _init()
  _update60= update_menu
 	_draw= draw_menu
+	start_locations={}
 	movable_items = {}
 	keycode = {}
-	init_player()
+	init_player(3,1,31,10)
 	init_map()
+	add_starts()
 	add_keycode()
 	add_movables()
 	reading=false
 	show_inventory=false
+	gameover = false
+	debu = ""
 end
 
 function init_map()
@@ -43,12 +47,24 @@ function init_map()
  cavefloor = {11}
 end
 
-function init_player()
+function init_starts(x,y)
+ stloc = {}
+ stloc.x = x
+ stloc.y = y
+ add(start_locations,stloc)
+end
+
+function add_starts()
+	init_starts(32,12)
+	init_starts(49,22)
+end
+
+function init_player(px,py,sp,sk)
 	p = {}
-	p.x = 3
-	p.y = 1
-	p.sprite = 31
-	p.keys = 0
+	p.x = px
+	p.y = py
+	p.sprite = sp
+	p.keys = sk
 end
 
 function init_code(x,y,k,sprite)
@@ -124,11 +140,17 @@ function update_menu()
 	if btnp(5) then
 		_update60 = update_game
 		_draw = draw_game
-		tb_init(0,intro_story)
+		tb_init(0,{"sir aaron..."
+		,"a magical treasure awaits!"
+		,"you must find all 16 magical\nscrolls to unlock the treasure."
+		,"solve the puzzles to find\nthe scrolls."
+		,"go forth!"})
 	end
 end
 
 function update_game()
+ debug = setx
+ debu2 = mapx
  calc_code()
  open_hidden()
  if reading then
@@ -163,17 +185,6 @@ function move_player()
 		sfx(0)
 	end
 end
-
-function update_win()
-	if reading then
-  tb_update()
-	else
-		if btnp(4) then
-			_update60=update_game
-			_draw=draw_game
-		end
-	end
-end
 -->8
 -- draw functions
 
@@ -191,7 +202,9 @@ function draw_game()
 	draw_movables()
 	tb_draw()
 	draw_inventory()
-	print(debug,60,0,7)
+	draw_win()
+	print(debug,mapx*8+90,mapy*8,10)
+	print(debug2,mapx*8+90,mapy*6,10)
 end
 
 function draw_win()
@@ -230,14 +243,25 @@ function draw_keycode()
 end
 
 function draw_inventory()
- mapx=mapx*8
- mapy=mapy*8
  if show_inventory then
  	local mx1=0 my1=15 mx2=127 my2=50
 	 rectfill(mapx+mx1,mapy+my1,mapx+mx2,mapy+my2,0)
  	rect(mapx+mx1,mapy+my1,mapx+mx2,mapy+my2,7)
 	 print("inventory",mapx+44,mapy+20,7)
 	 print("\n\nkeys: "..p.keys.."\ncode: "..showcode,mapx+5,mapy+20,7)
+	end
+end
+
+function draw_win()
+	if gameover and p.y>31 then
+		print("\^t\^whappy birthday\n    aaron",mapx*8+10,mapy*8+55,7)
+		print(showcode,mapx*8+30,mapy*8+86,7)
+		print("this code unlocks a",mapx*8+30,mapy*8+96,7)
+		print("$30 nintendo eshop gift card!",mapx*8+6,mapy*8+102,7)
+		print("don't forget to write it down",mapx*8+6,mapy*8+108,7)
+
+		--print("")
+		print("press 🅾️ to keep wandering",mapx*8+14,mapy*8+116,7)
 	end
 end
 -->8
@@ -272,6 +296,17 @@ function is_movable(x,y)
 	end
 	return false
 end
+
+-- check if start of puzzle
+function is_start(x,y)
+	for i=1,#start_locations do
+		if x == start_locations[i].x and y==start_locations[i].y then
+			return true
+		end
+	end
+	return false
+end
+
 
 -- check if a keycode
 function is_keycode(x,y)
@@ -341,14 +376,15 @@ function interact(x,y)
 		tb_init(0,{"you found a magic scroll!\n"..inventory_clue})
 		update_code(x,y)
 	elseif is_tile(treasure,x,y) then
+		gameover = true
 		swap_tile(x,y)
-		tb_init(0,{"this code is for the...","nintendo eshop!\nmake sure to write it down"})
-		_update60=update_win
-		_draw=draw_win
 	elseif is_tile(lose,x,y) then
 		tb_init(0,{"uh-oh...","you need to watch out for\nthose spikes!"})
 		unswap_tile(x,y)
-		reset_player()
+		restart_level()
+	elseif is_start(x,y) then
+		setx = x
+		sety = y
 	end
 end
 		
@@ -475,8 +511,9 @@ end
 
 
 -- reset player
-function reset_player()
- 
+function restart_level()
+	newx = setx
+	newy = sety
 end
 -->8
 -- text boxes
@@ -530,16 +567,6 @@ function tb_draw() -- this function draws the text box.
 	 print(sub(tb.str[tb.i],1,tb.char),tb.x+2,tb.y+2,tb.col3) -- draw the text.
 	end
 end
--->8
--- text boxes input
-
-intro_story =
-{"sir aaron..."
-,"a magical treasure awaits!"
-,"you must find all 16 magical\nscrolls to unlock the treasure."
-,"solve the puzzles to find\nthe scrolls."
-,"go forth!"}
-
 __gfx__
 00000000ccccccccccccccccbbbbbbbbcccccccb6655556655444444bcccccccb3bbbbbb22222222222222222222222db4bbbbb444b4bb4b4444444499999999
 00000000ccccccccc777ccccbbbcbccccccccccb6556d55655444444bccccccc333bb3bb255555522222222222d222224b4bb44bb44449b44444444492922229
