@@ -347,6 +347,7 @@ function interact(x,y)
 	 else
 	 	tb_init(0,{"the door is locked"})
 	 end
+	 sfx(2)
 	elseif is_tile(waterwalk,x,y) then
 		swap_tile(x,y)
 	elseif is_movable(x,y) then
