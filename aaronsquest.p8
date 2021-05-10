@@ -56,7 +56,7 @@ function init_starts(x,y)
 end
 
 function add_starts()
-	init_starts(29,12)
+	init_starts(32,12)
 	init_starts(49,22)
 	init_starts(3,1)
 	init_starts(48,14)
@@ -155,6 +155,7 @@ end
 function update_game()
  calc_code()
  open_hidden()
+ run_anim()
  if reading then
   tb_update()
 	else
@@ -163,7 +164,10 @@ function update_game()
  	end
  	if not show_inventory then
   	move_player()
-  	run_anim()
+ 	else
+ 		if btnp(5) then
+ 			restart_level()
+ 		end
   end
  end
 end
@@ -225,8 +229,6 @@ function draw_map()
 	camera(mapx*8,mapy*8)
 	
 	map(0,0,0,0,128,64)
-	debug2 = mapx/8
-	debug= mapy/8
 end
 
 function draw_player()
@@ -248,11 +250,13 @@ end
 
 function draw_inventory()
  if show_inventory then
- 	local mx1=0 my1=15 mx2=127 my2=50
-	 rectfill(mapx+mx1,mapy+my1,mapx+mx2,mapy+my2,0)
- 	rect(mapx+mx1,mapy+my1,mapx+mx2,mapy+my2,7)
-	 print("inventory",mapx+44,mapy+20,7)
-	 print("\n\nkeys: "..p.keys.."\ncode: "..showcode,mapx+5,mapy+20,7)
+ 	local mx1=0 my1=15 mx2=127 my2=65
+	 rectfill(mapx*8+mx1,mapy*8+my1,mapx*8+mx2,mapy*8+my2,0)
+ 	rect(mapx*8+mx1,mapy*8+my1,mapx*8+mx2,mapy*8+my2,7)
+	 print("inventory",mapx*8+44,mapy*8+20,7)
+	 print("\n\nkeys: "..p.keys.."\ncode: "..showcode,mapx*8+5,mapy*8+20,7)
+		print("press 🅾️ to close inventory",mapx*8+5,mapy*8+48,7)
+		print("press ❎ to reset blocks",mapx*8+5,mapy*8+56,7)
 	end
 end
 
@@ -522,8 +526,8 @@ function restart_level()
 	for i=#movable_items,1,-1 do
 		del(movable_items,movable_items[i])
 	end
-	
 	add_movables()
+
 end 
 	
 -->8
