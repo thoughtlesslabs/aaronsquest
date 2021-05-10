@@ -9,12 +9,16 @@ function _init()
 	_draw= draw_menu
 	movable_items = {}
 	keycode = {}
-	init_player()
+	start_locations = {}
+	init_player(3,1,31,10)
 	init_map()
 	add_keycode()
 	add_movables()
+	add_starts()
 	reading=false
 	show_inventory=false
+	gameover=false
+	debug = ""
 end
 
 function init_map()
@@ -40,12 +44,12 @@ function init_map()
  anim2 = {79}
 end
 
-function init_player()
+function init_player(px,py,sp,sk)
 	p = {}
-	p.x = 3
-	p.y = 1
-	p.sprite = 31
-	p.keys = 0
+	p.x = px
+	p.y = py
+	p.sprite = sp
+	p.keys = sk
 end
 
 function init_code(x,y,k,sprite)
@@ -54,7 +58,7 @@ function init_code(x,y,k,sprite)
  code.y = y
  code.key = k
  code.sprite = sprite
- code.show = false
+ code.show = true
  add(keycode,code)
 end
 
@@ -106,6 +110,18 @@ function add_movables()
 	init_movable(38,12,59)
 end	
 
+function init_starts(x,y)
+	stloc = {}
+	stloc.x = x
+	stloc.y = y
+	add(start_locations,stloc)
+end
+
+function add_starts()
+	init_starts(32,12)
+	init_starts(49,22)
+end
+
 
 	
 
@@ -118,11 +134,17 @@ function update_menu()
 	if btnp(5) then
 		_update60 = update_game
 		_draw = draw_game
-		tb_init(0,intro_story)
+		tb_init(0,{"sir aaron..."
+		,"a magical treasure awaits!"
+		,"you must find all 16 magical\nscrolls to unlock the treasure."
+		,"solve the puzzles to find\nthe scrolls."
+		,"go forth!"})
 	end
 end
 
 function update_game()
+ debug=setx
+ debug2=mapx
  calc_code()
  if reading then
   tb_update()
@@ -133,7 +155,7 @@ function update_game()
  	if not show_inventory then
   	move_player()
   	run_anim()
-  end
+  end 
  end
 end
 
@@ -156,17 +178,6 @@ function move_player()
 		sfx(0)
 	end
 end
-
-function update_win()
-	if reading then
-  tb_update()
-	else
-		if btnp(4) then
-			_update60=update_game
-			_draw=draw_game
-		end
-	end
-end
 -->8
 -- draw functions
 
@@ -184,15 +195,9 @@ function draw_game()
 	draw_movables()
 	tb_draw()
 	draw_inventory()
-	print(p.x,60,0,7)
-end
-
-function draw_win()
-	cls()
-	draw_map()
-	print(showcode,mapx*8+10,mapy*8+50,7)
-	print("press 🅾️ to keep wandering",mapx*8+10,mapy*8+60,7)
-	tb_draw()
+	draw_win()
+	print(debug,mapx*8+90,mapy*8,10)
+ print(debug2,mapx*8+90,mapy*8+6,10)
 end
 
 function draw_map()
@@ -223,14 +228,25 @@ function draw_keycode()
 end
 
 function draw_inventory()
- mapx=mapx*8
- mapy=mapy*8
  if show_inventory then
  	local mx1=0 my1=15 mx2=127 my2=50
 	 rectfill(mapx+mx1,mapy+my1,mapx+mx2,mapy+my2,0)
  	rect(mapx+mx1,mapy+my1,mapx+mx2,mapy+my2,7)
 	 print("inventory",mapx+44,mapy+20,7)
 	 print("\n\nkeys: "..p.keys.."\ncode: "..showcode,mapx+5,mapy+20,7)
+	end
+end
+
+function draw_win()
+	if gameover and p.y>31 then
+		print("\^t\^whappy birthday\n    aaron",mapx*8+10,mapy*8+55,7)
+		print(showcode,mapx*8+30,mapy*8+86,7)
+		print("this code unlocks a",mapx*8+30,mapy*8+96,7)
+		print("$30 nintendo eshop gift card!",mapx*8+6,mapy*8+102,7)
+		print("don't forget to write it down",mapx*8+6,mapy*8+108,7)
+
+		--print("")
+		print("press 🅾️ to keep wandering",mapx*8+14,mapy*8+116,7)
 	end
 end
 -->8
@@ -260,6 +276,16 @@ end
 function is_movable(x,y)
 	for i=1,#movable_items do
 		if x == movable_items[i].x and y==movable_items[i].y then
+			return true
+		end
+	end
+	return false
+end
+
+-- check if start of puzzle
+function is_start(x,y)
+	for i=1,#start_locations do
+		if x == start_locations[i].x and y==start_locations[i].y then
 			return true
 		end
 	end
@@ -334,14 +360,15 @@ function interact(x,y)
 		tb_init(0,{"you found a magic scroll!\n"..inventory_clue})
 		update_code(x,y)
 	elseif is_tile(treasure,x,y) then
+		gameover=true
 		swap_tile(x,y)
-		tb_init(0,{"this code is for the...","nintendo eshop!\nmake sure to write it down"})
-		_update60=update_win
-		_draw=draw_win
 	elseif is_tile(lose,x,y) then
 		tb_init(0,{"uh-oh...","you need to watch out for\nthose spikes!"})
 		unswap_tile(x,y)
-		reset_player()
+		restart_level()
+	elseif is_start(x,y) then
+		setx = x
+		sety = y
 	end
 end
 		
@@ -455,9 +482,14 @@ function display_inventory()
 	end
 end
 
-function reset_player()
- 
+function restart_level()
+	newx = setx
+	newy = sety
+	
 end
+
+
+
 -->8
 -- text boxes
 
@@ -511,14 +543,11 @@ function tb_draw() -- this function draws the text box.
 	end
 end
 -->8
--- text boxes input
+-- to do
 
-intro_story =
-{"sir aaron..."
-,"a magical treasure awaits!"
-,"you must find all 16 magical\nscrolls to unlock the treasure."
-,"solve the puzzles to find\nthe scrolls."
-,"go forth!"}
+-- fix story
+-- add sfx
+-- allow for restart of level
 
 __gfx__
 00000000ccccccccccccccccbbbbbbbbcccccccb6655556655444444bcccccccb3bbbbbb22222222222222222222222db4bbbbb444b4bb4b4444444499999999
@@ -585,7 +614,7 @@ ddd6ddd5ddd6ddd566d56ddd55d666664b44b4bb5555555444444444444444440555025505550255
 00000000000000055595500000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000555000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-8282828282b282918181818181818181818181818181818181818181818181818100000000000000000000000000000000000000000000000000000000000000
+8282828282b282910000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 91a0a0a0a0a0a0910000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
@@ -730,7 +759,7 @@ __map__
 3f31313131313e01582122222222212118181818181818181818181818181818282828282828282828282828282828280000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 3211111111113201472122222222212121181818181818181818181818181818283b0a0a0b0b0b0a0a0a190a0a0a0a280000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 3211111110113202582121222222212121181818181818181818181818181818280a0b0a0a0b0b0b0a3b190a0b0a0a280000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
-3211111111113201472121222221212121211818181818181818181818181818280a0a0a3b3b3b280a28190a0b0b0a280000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
+3211114f11113201472121222221212121211818181818181818181818181818280a0a0a3b3b3b280a28190a0b0b0a280000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 32111111111132015821212121212121212118181818181818181818181818182828280a282828190b0b190a0a0b0a280000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 3331311131313001042121212121212121212118181818181818181818181818280a3b0a3b0b0a190a0a193b3b0a3b280000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 0133313631300247212121212121212121202118181818181818181818181818280a0a0a0a0a0a190a0a190a0a0a0a280000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
