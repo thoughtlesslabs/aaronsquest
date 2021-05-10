@@ -104,6 +104,8 @@ function init_movable(x,y,sprite)
 	mi = {}
 	mi.x = x
 	mi.y = y
+	mi.ox = x
+	mi.oy = y
 	mi.active = false
 	mi.sprite = sprite
 	add(movable_items,mi)
@@ -156,6 +158,7 @@ function update_game()
  calc_code()
  open_hidden()
  run_anim()
+ debug = stat(1)
  if reading then
   tb_update()
 	else
@@ -166,7 +169,9 @@ function update_game()
   	move_player()
  	else
  		if btnp(5) then
+ 			move_player()
  			restart_level()
+ 			
  		end
   end
  end
@@ -344,7 +349,7 @@ function interact(x,y)
 			if missing_scrolls >0 then
 				tb_init(0,{"you are still missing "..missing_scrolls.."\nmagic scrolls. come back later"})
 			else
-				tb_init(0,{"you found all the magic scrolls\nyou're treasure is inisde"})
+				tb_init(0,{"you found all the magic scrolls\nyou're treasure is inside"})
 				swap_tile(x,y)
 			end
 		elseif p.keys>0 then
@@ -518,16 +523,24 @@ function open_hidden()
 end 		
 
 
--- reset player
+-- reset level
 function restart_level()
-	newx = setx
-	newy = sety
-	
-	for i=#movable_items,1,-1 do
-		del(movable_items,movable_items[i])
-	end
-	add_movables()
+	cmapx = flr(p.x/16)*16
+	cmapy = flr(p.y/16)*16
 
+	p.x = setx
+	p.y = sety
+ 
+	for x=cmapx*8,cmapx*8+127 do
+		for y=cmapy*8,cmapy*8+127 do
+			for i=#movable_items,1,-1 do
+				if movable_items[i].x == x and movable_items[i].y == y then
+					movable_items[i].x =  movable_items[i].ox
+					movable_items[i].y =  movable_items[i].oy
+				end
+			end
+		end
+	end
 end 
 	
 -->8
