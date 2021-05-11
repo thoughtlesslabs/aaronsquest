@@ -471,6 +471,7 @@ function update_code(x,y)
 		if x == keycode[i].x and y == keycode[i].y then
 			keycode[i].show = true
 			keycode[i].sprite += 2
+			mset(x,y,keycode[i].sprite)
 		end
 	end
 end
@@ -515,10 +516,9 @@ end
 
 -- open hidden entrances
 function open_hidden()
+ debug2 = mget(46,1)
 	if is_tile(cavefloor,46,1) then
-		debug = "testing"
-	else
-		mset(47,14,71)
+		mset(47,14,106)
 	end
 end 		
 
