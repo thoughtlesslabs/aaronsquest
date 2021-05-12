@@ -220,7 +220,6 @@ function draw_game()
 	tb_draw()
 	draw_inventory()
 	draw_win()
-	print(current,mapx*8+80,mapy*8,6)
 end
 
 function draw_map()
