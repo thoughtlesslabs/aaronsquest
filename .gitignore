@@ -1,2 +1,5 @@
 #ignore psd of logo
 *.psd
+
+#ignore png file of game
+*.p8.png
