@@ -3,3 +3,6 @@
 
 #ignore png file of game
 *.p8.png
+
+#ignore mac DS files
+*.DS_Store
