@@ -5,7 +5,7 @@ __lua__
 -- a thoughtless labs experiment
 
 function _init()
-poke(0x5f5c,5)
+	poke(0x5f5c,5)
  poke(0x5f5d,5)
 
  _update60= update_menu
@@ -323,19 +323,6 @@ function is_start(x,y)
 	return false
 end
 
--- check if hidden door triggered
-function is_unlocked(x,y)
-	for i=1,#keycode do
-		if keycode[i].sprite==11
-		and x==keycode[i].x 
-		and y==keycode[i].y then
-		return true
-		end
-	end
-	return false
-end
-
-
 -- check if a keycode
 function is_keycode(x,y)
 	for i=1,#keycode do
@@ -483,6 +470,7 @@ function update_code(x,y)
 			if keycode[i].active then
 				keycode[i].show = true
 				keycode[i].sprite += 2
+				mset(keycode[i].x,keycode[i].y,keycode[i].sprite)
 			end
 		end
 	end
@@ -528,7 +516,7 @@ end
 
 -- open hidden entrances
 function open_hidden()
-	if is_unlocked(46,1) then
+	if is_tile(cavefloor,46,1) then
 		mset(47,14,106)
 	end
 	if is_movable(6,21) then
