@@ -237,9 +237,8 @@ function draw_game()
 	draw_player()
 	draw_movables()
 	tb_draw()
-	draw_inventory()
 	draw_win()
-	print(debug,mapx*8+70,mapy*8,7)
+	draw_inventory()
 end
 
 function draw_map()
@@ -406,6 +405,7 @@ function interact(x,y)
 	elseif is_tile(treasure,x,y) then
 		gameover = true
 		swap_tile(x,y)
+		music(26)
 	elseif is_tile(lose,x,y) then
 		restart_level()
 		tb_init(61,{"uh-oh...","you need to watch out for\nthose spikes!"})
