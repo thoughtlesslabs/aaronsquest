@@ -10,6 +10,7 @@ function _init()
  music(0)
  _update60= update_menu
 	_draw= draw_menu
+
 	start_locations={}
 	movable_items = {}
 	keycode = {}
@@ -21,6 +22,8 @@ function _init()
 	reading=false
 	show_inventory=false
 	gameover = false
+	logoy=-30
+	logody=40
 end
 
 function init_map()
@@ -168,15 +171,16 @@ end
 -- update functions
 
 function update_menu()
+	logo_animation()
+	
 	if btnp(5) then
 		_update60 = update_game
 		_draw = draw_game
 		tb_init(61,{"sir aaron..."
-		,"a magical treasure awaits!"
-		,"you must find all 16 magical\nscrolls to unlock the treasure."
+		,"a bountiful treasure awaits!"
+		,"you must find all 16 magic\nscrolls to unlock the treasure."
 		,"solve the puzzles to find\nthe scrolls."
 		,"go forth!"})
-		sfx(58)
 	end
 end
 
@@ -226,8 +230,10 @@ end
 
 function draw_menu()
 	cls()
-	spr(64,36,45,7,4)
+	
+	spr(64,36,logoy,7,4)
 	print("press ❎ to start",32,90,6)
+
 end
 
 function draw_game()
@@ -616,6 +622,13 @@ function tb_draw() -- this function draws the text box.
 	 rect(tb.x,tb.y,tb.x+tb.w,tb.y+tb.h,tb.col2) -- draw the border.
 	 print(sub(tb.str[tb.i],1,tb.char),tb.x+2,tb.y+2,tb.col3) -- draw the text.
 	end
+end
+-->8
+-- juice
+function logo_animation()
+ if logoy != logody then
+ 	logoy += (logody - logoy)/15
+ end
 end
 __gfx__
 00000000ccccccccccccccccbbbbbbbbcccccccb6655556655444444bcccccccb3bbbbbb22222222222222222222222db4bbbbb444b4bb4b4444444499999999
